@@ -2,6 +2,8 @@ import tensorflow as tf
 
 from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.ops import math_ops
+import matplotlib.pyplot as plt
+
 
 import os
 import sys
@@ -64,9 +66,7 @@ class CNetTrainer:
             test_set = self.dataset.get_testset()
             self.num_test_steps = (self.dataset.get_num_test() / self.model.batch_size) * self.num_epochs
             print('Number of training steps: {}'.format(self.num_test_steps))
-            provider = slim.dataset_data_provider.DatasetDataProvider(test_set, num_readers=1, shuffle=False,
-                                                                      common_queue_capacity=20 * self.model.batch_size,
-                                                                      common_queue_min=10 * self.model.batch_size)
+            provider = slim.dataset_data_provider.DatasetDataProvider(test_set, num_readers=1, shuffle=False)
 
             # Parse a serialized Example proto to extract the image and metadata.
             [img_test] = provider.get(['image'])
@@ -77,7 +77,7 @@ class CNetTrainer:
             # Make batches
             imgs_test = tf.train.batch([img_test],
                                         batch_size=self.model.batch_size,
-                                        num_threads=8,
+                                        num_threads=1,
                                         capacity=5 * self.model.batch_size)
             batch_queue = slim.prefetch_queue.prefetch_queue([imgs_test])
             return batch_queue.dequeue()
@@ -117,27 +117,73 @@ class CNetTrainer:
     def search_nn(self, query_img, chpt_path, layer_id):
         print('Restoring from: {}'.format(chpt_path))
         self.is_finetune = True
-        with self.sess.as_default():
-            imgs_tf = tf.placeholder(tf.uint8, shape=[self.model.batch_size, 224, 224, 3], name='imgs_tf')
-            imgs_tf = tf.to_float(imgs_tf) / 127.5 - 1.0
-            _, enc_q = self.model.classifier(imgs_tf, self.dataset.num_classes, training=False, reuse=None)
-            t_enc = slim.flatten(enc_q[layer_id])
+        with self.sess.as_default() as sess:
+            imgs_tf = tf.placeholder(tf.uint8, shape=[256, 256, 3], name='imgs_tf')
+            imgs_tf_ = tf.expand_dims(self.pre_processor.process_test(imgs_tf), axis=0)
+            _, enc_q = self.model.classifier(imgs_tf_, self.dataset.num_classes, training=False, reuse=None)
+            enc_l = self.pool_and_norm(enc_q[layer_id])
 
             vars = slim.get_variables_to_restore(include=['discriminator'])
             print('Variables to restore: {}'.format([v.op.name for v in vars]))
             saver = tf.train.Saver(var_list=vars)
             saver.restore(self.sess, chpt_path)
             self.sess.run(tf.global_variables_initializer())
-            target_enc = self.sess.run([t_enc], feed_dict={imgs_tf: query_img})
+            target_enc = self.sess.run(enc_l, feed_dict={imgs_tf: query_img})
 
             target_tf = tf.placeholder(tf.float32, shape=target_enc.shape, name='target_tf')
             imgs_train = self.get_test_batch()
-            _, enc_l = self.model.classifier(imgs_train, self.dataset.num_classes, training=False, reuse=True)
-            enc_imgs = slim.flatten(enc_l[layer_id])
-            dist = tf.norm(enc_imgs-target_tf)
-            for i in self.num_test_steps:
-                d = self.sess.run(dist, feed_dict={target_tf: target_enc})
+            _, enc_layers = self.model.classifier(imgs_train, self.dataset.num_classes, training=False, reuse=True)
+            enc_ls = self.pool_and_norm(enc_layers[layer_id])
+
+            dist = tf.reduce_sum(enc_ls*target_tf, axis=1)
+            vals, inds = tf.nn.top_k(dist, k=1)
+            nn_imgs = tf.gather(imgs_train, inds)
+
+            sv = tf.train.Supervisor()
+            sv.start_queue_runners(sess)
+            f, axarr = plt.subplots(1, 2)
+            plt.ion()
+            plt.show(block=False)
+
+            axarr[0].imshow(query_img)
+            for i in range(self.num_test_steps):
+                [d, img] = self.sess.run([vals, nn_imgs], feed_dict={target_tf: target_enc})
+                axarr[1].imshow((np.squeeze(img)+1.0)/2.0)
+                f.canvas.draw()
+
                 print(d)
 
+    def compute_stats(self, query_img, chpt_path, layer_id):
+        print('Restoring from: {}'.format(chpt_path))
+        self.is_finetune = True
+        with self.sess.as_default() as sess:
+            imgs_train = self.get_test_batch()
+            _, enc_layers = self.model.classifier(imgs_train, self.dataset.num_classes, training=False, reuse=None)
+            enc_ls = self.pool_and_norm(enc_layers[layer_id])
+            print('enc_ls shape: {}'.format(enc_ls.get_shape().as_list()))
+
+            vars = slim.get_variables_to_restore(include=['discriminator'])
+            print('Variables to restore: {}'.format([v.op.name for v in vars]))
+            self.sess.run(tf.global_variables_initializer())
+
+            saver = tf.train.Saver(var_list=vars)
+            saver.restore(self.sess, chpt_path)
+            mu, var = tf.nn.moments(enc_ls, axes=[0])
+
+            sv = tf.train.Supervisor()
+            sv.start_queue_runners(sess)
+
+            for i in range(self.num_test_steps):
+                [mu_, var_] = self.sess.run([mu, var])
+                print(mu_[:10])
+
+    def pool_and_norm(self, net):
+        net_shape = net.get_shape().as_list()
+        m_pool = slim.max_pool2d(net, kernel_size=net_shape[1:3])
+        a_pool = slim.avg_pool2d(net, kernel_size=net_shape[1:3])
+        net = tf.concat([m_pool, a_pool], 3)
+        net = slim.flatten(net)
+        net = tf.nn.l2_normalize(net, dim=1)
+        return net
 
 

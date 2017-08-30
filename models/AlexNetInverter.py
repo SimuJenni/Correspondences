@@ -47,7 +47,7 @@ def toon_net_argscope(activation=lrelu, kernel_size=(3, 3), padding='SAME', trai
 
 
 class AlexNetInverter:
-    def __init__(self, num_layers, batch_size, target_shape, layer_id=1, pool5=True, tag='default', enc_pad='SAME'):
+    def __init__(self, model, target_shape, layer_id=1, tag='default'):
         """Initialises a ToonNet using the provided parameters.
 
         Args:
@@ -55,11 +55,11 @@ class AlexNetInverter:
             batch_size: The batch-size used during training (used to generate training labels)
         """
         self.name = 'AlexNetInverter_{}_layer{}'.format(tag, layer_id)
-        self.num_layers = num_layers
-        self.batch_size = batch_size
+        self.num_layers = 5
+        self.batch_size = model.batch_size
         self.im_shape = target_shape
         self.layer_id = layer_id
-        self.encoder = AlexNet(batch_size, pool5=pool5, pad=enc_pad)
+        self.encoder = model
         self.dec_im = self.disc_out = self.enc_im = self.enc_dec_im = None
 
     def net(self, imgs, reuse=None, train=True):
