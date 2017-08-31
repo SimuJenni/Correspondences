@@ -70,21 +70,21 @@ class AlexNet:
                                                  fix_bn=self.fix_bn)):
                 net = slim.conv2d(net, 96, kernel_size=[11, 11], stride=4, scope='conv_1', padding=self.pad,
                                   normalizer_fn=None, trainable=False)
-                layers.append(net)
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_1', padding=self.pad)
                 net = sort_channels_2(net)
+                layers.append(net)
                 net = tf.nn.lrn(net, depth_radius=2, alpha=0.00002, beta=0.75)
                 net = conv_group(net, 256, kernel_size=[5, 5], scope='conv_2')
-                layers.append(net)
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_2', padding=self.pad)
+                layers.append(net)
                 net = tf.nn.lrn(net, depth_radius=2, alpha=0.00002, beta=0.75)
                 net = slim.conv2d(net, 384, kernel_size=[3, 3], scope='conv_3')
                 layers.append(net)
                 net = conv_group(net, 384, kernel_size=[3, 3], scope='conv_4')
                 layers.append(net)
                 net = conv_group(net, 256, kernel_size=[3, 3], scope='conv_5')
-                layers.append(net)
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_5', padding=self.pad)
+                layers.append(net)
 
         with tf.variable_scope('fully_connected', reuse=reuse):
             with slim.arg_scope(

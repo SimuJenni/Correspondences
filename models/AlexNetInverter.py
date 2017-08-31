@@ -169,11 +169,11 @@ class AlexNetInverter:
     def invertion_loss(self):
         # Define the losses for AE training
         ae_loss_scope = 'inversion_loss'
-        ae_loss = tf.losses.mean_squared_error(self.enc_im, self.enc_dec_im, scope=ae_loss_scope, weights=100.0)
+        ae_loss = tf.losses.mean_squared_error(self.enc_im, self.enc_dec_im, scope=ae_loss_scope, weights=30.0)
         tf.summary.scalar('losses/feature', ae_loss)
         disc_loss = tf.losses.softmax_cross_entropy(self.labels_fake(), self.disc_out, scope=ae_loss_scope,
-                                                    weights=2.0)
-        tv_loss = 5e-4*tf.reduce_mean(tf.image.total_variation(self.dec_im))
+                                                    weights=0.2)
+        tv_loss = 1e-8*tf.reduce_mean(tf.image.total_variation(self.dec_im))
         tf.summary.scalar('losses/tv', tv_loss)
         losses_ae = tf.losses.get_losses(ae_loss_scope)
         losses_ae += tf.losses.get_regularization_losses(ae_loss_scope)
@@ -185,7 +185,7 @@ class AlexNetInverter:
         # Define loss for discriminator training
         disc_loss_scope = 'disc_loss'
         real_loss = tf.losses.softmax_cross_entropy(self.labels_real(), self.disc_out, scope=disc_loss_scope,
-                                                    weights=1.0)
+                                                    weights=0.1)
         tf.summary.scalar('losses/discriminator', real_loss)
         losses_disc = tf.losses.get_losses(disc_loss_scope)
         losses_disc += tf.losses.get_regularization_losses(disc_loss_scope)

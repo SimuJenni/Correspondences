@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fefc6fe7-0783-493b-bccf-03fef45d6576" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/models/AlexNet_self_sim.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Preprocessor.py" afterPath="$PROJECT_DIR$/Preprocessor.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/imagenet_nn_search.py" afterPath="$PROJECT_DIR$/imagenet_nn_search.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/AlexNetInverter.py" afterPath="$PROJECT_DIR$/models/AlexNetInverter.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/AlexNet_chan_sort.py" afterPath="$PROJECT_DIR$/models/AlexNet_chan_sort.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/AlexNet_layers.py" afterPath="$PROJECT_DIR$/models/AlexNet_layers.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/train/AlexNet_NN_search.py" afterPath="$PROJECT_DIR$/train/AlexNet_NN_search.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/train_imagenet_inverter.py" afterPath="$PROJECT_DIR$/train_imagenet_inverter.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -33,9 +29,11 @@
       <file leaf-file-name="AlexNet_NN_search.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/train/AlexNet_NN_search.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="478">
+              <caret line="171" column="0" lean-forward="true" selection-start-line="171" selection-start-column="0" selection-end-line="171" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#23#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -43,9 +41,11 @@
       <file leaf-file-name="imagenet_nn_search.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/imagenet_nn_search.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="108">
-              <caret line="6" column="38" lean-forward="true" selection-start-line="6" selection-start-column="38" selection-end-line="6" selection-end-column="38" />
-              <folding />
+            <state relative-caret-position="414">
+              <caret line="23" column="23" lean-forward="true" selection-start-line="23" selection-start-column="23" selection-end-line="23" selection-end-column="23" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -72,12 +72,34 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="AlexNet_chan_sort.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/models/AlexNet_chan_sort.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="370">
+              <caret line="89" column="32" lean-forward="true" selection-start-line="89" selection-start-column="32" selection-end-line="89" selection-end-column="32" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="AlexNet_layers.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/models/AlexNet_layers.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-8">
-              <caret line="62" column="0" lean-forward="true" selection-start-line="62" selection-start-column="0" selection-end-line="62" selection-end-column="0" />
+            <state relative-caret-position="460">
+              <caret line="79" column="79" lean-forward="true" selection-start-line="79" selection-start-column="79" selection-end-line="79" selection-end-column="79" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AlexNetInverter.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/models/AlexNetInverter.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="748">
+              <caret line="186" column="88" lean-forward="true" selection-start-line="186" selection-start-column="87" selection-end-line="186" selection-end-column="88" />
+              <folding>
+                <element signature="e#0#23#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -118,7 +140,6 @@
         <option value="$PROJECT_DIR$/constants.py" />
         <option value="$PROJECT_DIR$/test_annotation.py" />
         <option value="$PROJECT_DIR$/models/AlexNet_wlayer.py" />
-        <option value="$PROJECT_DIR$/models/AlexNet_chan_sort.py" />
         <option value="$PROJECT_DIR$/train/AlexTrainer_sorted.py" />
         <option value="$PROJECT_DIR$/maximize_activation.py" />
         <option value="$PROJECT_DIR$/invert_representation.py" />
@@ -128,12 +149,13 @@
         <option value="$PROJECT_DIR$/models/CNet_class_sobel.py" />
         <option value="$PROJECT_DIR$/datasets/convert_celebA.py" />
         <option value="$PROJECT_DIR$/train_alexnet_sorted.py" />
-        <option value="$PROJECT_DIR$/models/AlexNetInverter.py" />
         <option value="$PROJECT_DIR$/models/AlexNet_self_sim.py" />
         <option value="$PROJECT_DIR$/Preprocessor.py" />
-        <option value="$PROJECT_DIR$/models/AlexNet_layers.py" />
         <option value="$PROJECT_DIR$/train/AlexNet_NN_search.py" />
         <option value="$PROJECT_DIR$/imagenet_nn_search.py" />
+        <option value="$PROJECT_DIR$/models/AlexNetInverter.py" />
+        <option value="$PROJECT_DIR$/models/AlexNet_chan_sort.py" />
+        <option value="$PROJECT_DIR$/models/AlexNet_layers.py" />
         <option value="$PROJECT_DIR$/train_imagenet_inverter.py" />
       </list>
     </option>
@@ -674,14 +696,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/AlexNet_chan_sort.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1062">
-          <caret line="61" column="98" lean-forward="false" selection-start-line="61" selection-start-column="98" selection-end-line="61" selection-end-column="98" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/constants.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="396">
@@ -711,16 +725,6 @@
         <state relative-caret-position="72">
           <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="5" selection-end-column="9" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/AlexNetInverter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="43" column="72" lean-forward="true" selection-start-line="43" selection-start-column="72" selection-end-line="43" selection-end-column="72" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -784,25 +788,47 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/models/AlexNet_layers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-8">
-          <caret line="62" column="0" lean-forward="true" selection-start-line="62" selection-start-column="0" selection-end-line="62" selection-end-column="0" />
+        <state relative-caret-position="460">
+          <caret line="79" column="79" lean-forward="true" selection-start-line="79" selection-start-column="79" selection-end-line="79" selection-end-column="79" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/train/AlexNet_NN_search.py">
+    <entry file="file://$PROJECT_DIR$/models/AlexNet_chan_sort.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+        <state relative-caret-position="370">
+          <caret line="89" column="32" lean-forward="true" selection-start-line="89" selection-start-column="32" selection-end-line="89" selection-end-column="32" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/AlexNetInverter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="748">
+          <caret line="186" column="88" lean-forward="true" selection-start-line="186" selection-start-column="87" selection-end-line="186" selection-end-column="88" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/imagenet_nn_search.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="6" column="38" lean-forward="true" selection-start-line="6" selection-start-column="38" selection-end-line="6" selection-end-column="38" />
-          <folding />
+        <state relative-caret-position="414">
+          <caret line="23" column="23" lean-forward="true" selection-start-line="23" selection-start-column="23" selection-end-line="23" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/train/AlexNet_NN_search.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="478">
+          <caret line="171" column="0" lean-forward="true" selection-start-line="171" selection-start-column="0" selection-end-line="171" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
