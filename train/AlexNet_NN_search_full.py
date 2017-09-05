@@ -114,7 +114,7 @@ class CNetTrainer:
     def search_nn(self, query_img, chpt_path, layer_id, model_name, im_id):
         print('Restoring from: {}'.format(chpt_path))
         self.is_finetune = True
-        mu = np.load('mu_{}_{}.npy'.format(model_name, layer_id))
+        mu = np.load('mu_flat_{}_{}.npy'.format(model_name, layer_id))
 
         with self.sess.as_default():
             with self.graph.as_default():
@@ -172,31 +172,32 @@ class CNetTrainer:
         print('Restoring from: {}'.format(chpt_path))
         self.is_finetune = True
         with self.sess.as_default() as sess:
-            imgs_train = self.get_test_batch()
-            _, enc_layers = self.model.classifier(imgs_train, self.dataset.num_classes, training=False, reuse=None)
-            enc_ls = self.hybrid_pool(enc_layers[layer_id])
-            print('enc_ls shape: {}'.format(enc_ls.get_shape().as_list()))
+            with self.graph.as_default():
+                imgs_train = self.get_test_batch()
+                _, enc_layers = self.model.classifier(imgs_train, self.dataset.num_classes, training=False, reuse=None)
+                enc_ls = self.hybrid_pool(enc_layers[layer_id])
+                print('enc_ls shape: {}'.format(enc_ls.get_shape().as_list()))
 
-            vars = slim.get_variables_to_restore(include=['discriminator'])
-            print('Variables to restore: {}'.format([v.op.name for v in vars]))
-            self.sess.run(tf.global_variables_initializer())
+                vars = slim.get_variables_to_restore(include=['discriminator'])
+                print('Variables to restore: {}'.format([v.op.name for v in vars]))
+                self.sess.run(tf.global_variables_initializer())
 
-            saver = tf.train.Saver(var_list=vars)
-            saver.restore(self.sess, chpt_path)
-            mu, _ = tf.nn.moments(enc_ls, axes=[0])
+                saver = tf.train.Saver(var_list=vars)
+                saver.restore(self.sess, chpt_path)
+                mu, _ = tf.nn.moments(enc_ls, axes=[0])
 
-            sv = tf.train.Supervisor()
-            sv.start_queue_runners(sess)
+                sv = tf.train.Supervisor()
+                sv.start_queue_runners(sess)
 
-            mu_ = np.zeros(mu.get_shape().as_list())
+                mu_ = np.zeros(mu.get_shape().as_list())
 
-            for i in range(self.num_test_steps):
-                print('Iteration {}/{}'.format(i, self.num_test_steps))
-                [mu_i] = self.sess.run([mu])
-                mu_ += mu_i
+                for i in range(self.num_test_steps):
+                    print('Iteration {}/{}'.format(i, self.num_test_steps))
+                    [mu_i] = self.sess.run([mu])
+                    mu_ += mu_i
 
-            mu_final = mu_/self.num_test_steps
-            np.save('mu_{}_{}'.format(model_name, layer_id), mu_final)
+                mu_final = mu_/self.num_test_steps
+                np.save('mu_flat_{}_{}'.format(model_name, layer_id), mu_final)
 
     def pool_and_norm(self, net, mu):
         net = self.hybrid_pool(net)
@@ -205,10 +206,6 @@ class CNetTrainer:
         return net
 
     def hybrid_pool(self, net):
-        net_shape = net.get_shape().as_list()
-        m_pool = slim.max_pool2d(net, kernel_size=net_shape[1:3])
-        a_pool = slim.avg_pool2d(net, kernel_size=net_shape[1:3])
-        net = tf.concat([m_pool, a_pool], 3)
         net = slim.flatten(net)
         return net
 

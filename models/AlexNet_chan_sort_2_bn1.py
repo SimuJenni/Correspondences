@@ -50,7 +50,7 @@ class AlexNet:
         self.pad = pad
         self.batch_size = batch_size
         self.num_layers = 5
-        self.name = 'AlexNet_sorted'
+        self.name = 'AlexNet_sorted2_bn1'
 
     def classifier(self, net, num_classes, reuse=None, training=True):
         """Builds a discriminator network on top of inputs.
@@ -68,10 +68,17 @@ class AlexNet:
         with tf.variable_scope('discriminator', reuse=reuse):
             with slim.arg_scope(alexnet_argscope(activation=self.fc_activation, padding='SAME', training=training,
                                                  fix_bn=self.fix_bn)):
+                batch_norm_params = {
+                    'is_training': training,
+                    'decay': 0.99,
+                    'epsilon': 0.001,
+                    'center': False,
+                    'fused': True
+                }
                 net = slim.conv2d(net, 96, kernel_size=[11, 11], stride=4, scope='conv_1', padding=self.pad,
-                                  normalizer_fn=None, trainable=False)
+                                  normalizer_params=batch_norm_params)
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_1', padding=self.pad)
-                net = sort_channels_2(net)
+                net = group_sort(net, 8)
                 layers.append(net)
                 net = tf.nn.lrn(net, depth_radius=2, alpha=0.00002, beta=0.75)
                 net = conv_group(net, 256, kernel_size=[5, 5], scope='conv_2')
@@ -129,7 +136,7 @@ def group_sort(net, num_groups=4):
     groups = tf.split(net, num_groups, axis=3)
     groups_sorted = []
     for g in groups:
-        groups_sorted.append(sort_channels_3(g))
+        groups_sorted.append(sort_channels_4(g))
     return tf.concat(groups_sorted, axis=3)
 
 
@@ -138,7 +145,7 @@ def sort_channels_3(net):
     print('net: {}'.format(net.get_shape().as_list()))
     fmap_energy = slim.flatten(slim.avg_pool2d(net, net_shape[1:3]))
     print('energy: {}'.format(fmap_energy.get_shape().as_list()))
-    _, ch_idx = tf.nn.top_k(fmap_energy, k=96)
+    _, ch_idx = tf.nn.top_k(fmap_energy, k=net_shape[3])
     batch_idx = tf.tile(tf.reshape(tf.range(net_shape[0]), [net_shape[0], 1, 1, 1, 1]),
                          [1, net_shape[1], net_shape[2], net_shape[3], 1])
     x_idx = tf.tile(tf.reshape(tf.range(net_shape[1]), [1, net_shape[1], 1, 1, 1]),
@@ -150,6 +157,27 @@ def sort_channels_3(net):
     indices = tf.concat(axis=4, values=[batch_idx, x_idx, y_idx, ch_idx])
     print('indices: {}'.format(indices.get_shape().as_list()))
     net_sorted = tf.gather_nd(net, indices)
+    print('net_sorted: {}'.format(net_sorted.get_shape().as_list()))
+
+    return net_sorted
+
+
+def sort_channels_4(net):
+    net_shape = net.get_shape().as_list()
+    print('net: {}'.format(net.get_shape().as_list()))
+    fmap_energy = slim.avg_pool2d(net, net_shape[1:3])
+    print('energy: {}'.format(fmap_energy.get_shape().as_list()))
+    _, ch_idx = tf.nn.top_k(fmap_energy, k=net_shape[3])
+    ch_idx = tf.tile(ch_idx, [1, net_shape[1], net_shape[2], 1])
+    print('ch_idx: {}'.format(ch_idx.get_shape().as_list()))
+
+    aux_idx = tf.meshgrid(tf.range(net_shape[0]), tf.range(net_shape[1]), tf.range(net_shape[2]), tf.range(net_shape[3]), indexing='ij')
+    print('aux_idx: {}'.format(aux_idx[0].get_shape().as_list()))
+
+    idx = tf.stack(aux_idx[:-1]+[ch_idx], axis=-1)
+    print('idx: {}'.format(idx.get_shape().as_list()))
+
+    net_sorted = tf.gather_nd(net, idx)
     print('net_sorted: {}'.format(net_sorted.get_shape().as_list()))
 
     return net_sorted

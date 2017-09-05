@@ -50,7 +50,7 @@ class AlexNet:
         self.pad = pad
         self.batch_size = batch_size
         self.num_layers = 5
-        self.name = 'AlexNet_sorted'
+        self.name = 'AlexNet_selfsim'
 
     def classifier(self, net, num_classes, reuse=None, training=True):
         """Builds a discriminator network on top of inputs.
@@ -69,22 +69,21 @@ class AlexNet:
             with slim.arg_scope(alexnet_argscope(activation=self.fc_activation, padding='SAME', training=training,
                                                  fix_bn=self.fix_bn)):
                 net = slim.conv2d(net, 96, kernel_size=[11, 11], stride=4, scope='conv_1', padding=self.pad,
-                                  normalizer_fn=None, trainable=False)
-                layers.append(net)
+                                  normalizer_fn=None)
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_1', padding=self.pad)
-                net = sort_channels_2(net)
-                net = tf.nn.lrn(net, depth_radius=2, alpha=0.00002, beta=0.75)
-                net = conv_group(net, 256, kernel_size=[5, 5], scope='conv_2')
                 layers.append(net)
+                net = conv_group(net, 256, kernel_size=[5, 5], scope='conv_2')
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_2', padding=self.pad)
-                net = tf.nn.lrn(net, depth_radius=2, alpha=0.00002, beta=0.75)
+                net = self_sim(net)
+                layers.append(net)
                 net = slim.conv2d(net, 384, kernel_size=[3, 3], scope='conv_3')
                 layers.append(net)
                 net = conv_group(net, 384, kernel_size=[3, 3], scope='conv_4')
                 layers.append(net)
                 net = conv_group(net, 256, kernel_size=[3, 3], scope='conv_5')
-                layers.append(net)
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_5', padding=self.pad)
+                layers.append(net)
+
 
         with tf.variable_scope('fully_connected', reuse=reuse):
             with slim.arg_scope(
@@ -117,9 +116,16 @@ def gram_matrix(v):
 
 def self_sim(net):
     net_shape = net.get_shape().as_list()
-
-
-
+    net = tf.nn.l2_normalize(net, 3)
+    channels = []
+    for x in range(net_shape[1]):
+        for y in range(net_shape[2]):
+            feat_vec = tf.slice(net, begin=[0, x, y, 0], size=[net_shape[0], 1, 1, net_shape[3]])
+            new_channel = tf.reduce_sum(net*feat_vec, axis=3, keep_dims=True)
+            print('Channel {}: {}'.format((x, y),new_channel.get_shape().as_list()))
+            channels.append(new_channel)
+    net = tf.concat(channels, 3)
+    return net
 
 def sort_channels(net):
     net_shape = net.get_shape().as_list()

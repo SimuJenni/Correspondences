@@ -92,8 +92,10 @@ class AlexNet:
                                      fix_bn=self.fix_bn)):
                 net = slim.flatten(net)
                 net = slim.fully_connected(net, 4096, scope='fc1')
+                layers.append(net)
                 net = slim.dropout(net, 0.5, is_training=training)
                 net = slim.fully_connected(net, 4096, scope='fc2')
+                layers.append(net)
                 net = slim.dropout(net, 0.5, is_training=training)
                 net = slim.fully_connected(net, num_classes, scope='fc3',
                                            activation_fn=None,

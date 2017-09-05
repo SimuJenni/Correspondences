@@ -215,6 +215,9 @@ class CNetTrainer:
 
                 # Make summaries
                 self.make_summaries()
+                with tf.variable_scope('discriminator', reuse=True):
+                    weights_disc_1 = slim.variable('conv_1/weights')
+                tf.summary.image('images/weights_disc_1', weights_montage(weights_disc_1, 6, 16), max_outputs=1)
 
                 # Create training operation
                 var2train = self.get_variables_to_train(num_conv2train)

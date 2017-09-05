@@ -3,7 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
     <content url="file:///usr/local/cuda/lib64" />
-    <orderEntry type="jdk" jdkName="Python 2.7.12 virtualenv at ~/virtualenvs/tf_1.1_opt" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 2.7.12 virtualenv at ~/virtualenvs/tf_1.3" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">
