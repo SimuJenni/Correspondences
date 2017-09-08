@@ -78,7 +78,7 @@ class AlexNet:
                 net = slim.conv2d(net, 96, kernel_size=[11, 11], stride=4, scope='conv_1', padding=self.pad,
                                   normalizer_params=batch_norm_params)
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_1', padding=self.pad)
-                net = group_sort(net, 8)
+                net = group_sort(net, 16)
                 layers.append(net)
                 net = tf.nn.lrn(net, depth_radius=2, alpha=0.00002, beta=0.75)
                 net = conv_group(net, 256, kernel_size=[5, 5], scope='conv_2')

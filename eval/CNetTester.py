@@ -75,7 +75,7 @@ class SDNetTester:
 
         return imgs_test, labels_test
 
-    def test_classifier(self, num_conv_trained=None, dataset_id=None):
+    def test_classifier(self, num_conv_trained=None, dataset_id=None, ckpt_dir=None):
         if not self.additional_info:
             self.additional_info = 'conv_{}'.format(num_conv_trained)
         print('Restoring from: {}'.format(self.get_save_dir()))
@@ -85,7 +85,7 @@ class SDNetTester:
                 imgs_test, labels_test = self.get_test_batch(dataset_id)
 
                 # Get predictions
-                predictions = self.model.classifier(imgs_test, self.dataset.num_classes, training=False)
+                predictions, _ = self.model.classifier(imgs_test, self.dataset.num_classes, training=False)
 
                 # Compute predicted label for accuracy
                 preds_test = tf.argmax(predictions, 1)
@@ -97,11 +97,18 @@ class SDNetTester:
                 summary_ops = self.make_summaries(names_to_values)
 
                 # Start evaluation
-                slim.evaluation.evaluation_loop('', self.get_save_dir(), self.get_save_dir(),
-                                                num_evals=self.num_eval_steps,
-                                                max_number_of_evaluations=10,
-                                                eval_op=names_to_updates.values(),
-                                                summary_op=tf.summary.merge(summary_ops))
+                if ckpt_dir:
+                    slim.evaluation.evaluation_loop('', ckpt_dir, ckpt_dir,
+                                                    num_evals=self.num_eval_steps,
+                                                    max_number_of_evaluations=10,
+                                                    eval_op=names_to_updates.values(),
+                                                    summary_op=tf.summary.merge(summary_ops))
+                else:
+                    slim.evaluation.evaluation_loop('', self.get_save_dir(), self.get_save_dir(),
+                                                    num_evals=self.num_eval_steps,
+                                                    max_number_of_evaluations=10,
+                                                    eval_op=names_to_updates.values(),
+                                                    summary_op=tf.summary.merge(summary_ops))
 
     def test_classifier_voc(self, num_conv_trained=None):
         self.additional_info = 'conv_{}'.format(num_conv_trained)

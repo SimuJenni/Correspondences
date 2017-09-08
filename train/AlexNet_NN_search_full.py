@@ -124,7 +124,7 @@ class CNetTrainer:
                 _, enc_q = self.model.classifier(imgs_tf_, self.dataset.num_classes, training=False, reuse=None)
                 enc_l = self.pool_and_norm(enc_q[layer_id], mu)
 
-                vars = slim.get_variables_to_restore()
+                vars = slim.get_variables_to_restore(include=['discriminator'])
                 print('Variables to restore: {}'.format([v.op.name for v in vars]))
                 saver = tf.train.Saver(var_list=vars)
                 saver.restore(self.sess, chpt_path)

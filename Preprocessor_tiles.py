@@ -4,7 +4,7 @@ slim = tf.contrib.slim
 
 
 class Preprocessor:
-    def __init__(self, target_shape, crop_size, augment_color=False, aspect_ratio_range=(0.8, 1.2), area_range=(0.4, 0.9)):
+    def __init__(self, target_shape, crop_size, augment_color=False, aspect_ratio_range=(0.7, 1.3), area_range=(0.25, 0.8)):
         self.tile_shape = target_shape
         self.crop_size = crop_size
         self.augment_color = augment_color
@@ -19,8 +19,8 @@ class Preprocessor:
 
     def extract_tiles(self, image):
         tiles = []
-        dx = self.tile_shape[0]
-        dy = self.tile_shape[1]
+        dx = self.crop_size[0]/3
+        dy = self.crop_size[1]/3
         for x in range(3):
             for y in range(3):
                 tile = tf.slice(image, [dx*x, dy*y, 0], [dx, dy, 3])
@@ -43,6 +43,8 @@ class Preprocessor:
         return image
 
     def extract_random_patch(self, image, bbox=(0., 0., 1., 1.)):
+        image = tf.contrib.image.rotate(image, tf.random_uniform((1,), minval=-0.25, maxval=0.25), interpolation='BILINEAR')
+
         sample_distorted_bounding_box = tf.image.sample_distorted_bounding_box(
             tf.shape(image),
             [[bbox]],
@@ -65,7 +67,6 @@ class Preprocessor:
 
     def color_augment_and_scale(self, image):
         image = tf.to_float(image) / 255.
-        image = tf.image.rgb_to_grayscale(image)
 
         if self.augment_color:
             bright_delta, sat, hue_delta, cont = sample_color_params()
@@ -85,6 +86,7 @@ class Preprocessor:
         print('tile {}'.format(tiles[0].get_shape().as_list()))
         for i, tile in enumerate(tiles):
             tf.summary.image('imgs/tile_{}'.format(i), tf.expand_dims(tile, 0), max_outputs=1)
+
         tiles = tf.stack(tiles)
         print('tiles: {}'.format(tiles.get_shape().as_list()))
         return tiles

@@ -1,6 +1,6 @@
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
-from layers import conv_group
+from layers import conv_group, lrelu
 
 
 def alexnet_argscope(activation=tf.nn.relu, kernel_size=(3, 3), padding='SAME', training=True, center=True,
@@ -24,7 +24,7 @@ def alexnet_argscope(activation=tf.nn.relu, kernel_size=(3, 3), padding='SAME', 
         'decay': 0.99,
         'epsilon': 0.001,
         'center': center,
-        'fused': False
+        'fused': True
     }
     he = tf.contrib.layers.variance_scaling_initializer(mode='FAN_AVG')
     with slim.arg_scope([slim.conv2d, slim.fully_connected],
@@ -84,7 +84,6 @@ class AlexNet:
                 net = conv_group(net, 256, kernel_size=[3, 3], scope='conv_5')
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_5', padding=self.pad)
                 layers.append(net)
-
 
         with tf.variable_scope('fully_connected', reuse=reuse):
             with slim.arg_scope(

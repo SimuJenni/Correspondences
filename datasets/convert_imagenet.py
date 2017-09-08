@@ -85,6 +85,7 @@ from datetime import datetime
 
 import numpy as np
 import tensorflow as tf
+from scipy.misc import imresize
 
 from datasets.dataset_utils import image_to_tfexample, ImageCoder
 
@@ -155,6 +156,11 @@ def _process_image(filename, coder, im_dim=256):
 
     # Decode the RGB JPEG.
     image = coder.decode_jpeg(image_data)
+    im_shape = image.shape[:2]
+    min_size = np.min(im_shape)
+    if min_size < im_dim:
+        new_size = np.around(np.asarray(im_shape)*im_dim/min_size)
+        image = imresize(image, new_size.astype(int))
 
     # Check that image converted to RGB
     assert len(image.shape) == 3

@@ -1,7 +1,7 @@
 from Preprocessor import Preprocessor
 from datasets.ImageNet import ImageNet
 from eval.AlexTrainer_sorted import CNetTrainer
-from models.AlexNet_chan_sort_2_bn1 import AlexNet
+from models.AlexNet_chan_sort_16 import AlexNet
 from constants import LOG_DIR
 import os
 

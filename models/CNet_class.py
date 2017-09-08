@@ -6,7 +6,7 @@ DEFAULT_FILTER_DIMS = [64, 128, 256, 512, 1024]
 
 
 def cnet_argscope(activation=tf.nn.relu, kernel_size=(3, 3), padding='SAME', training=True, center=True,
-                  w_reg=0.0001, fix_bn=False):
+                  w_reg=0.00005, fix_bn=False):
     """Defines default parameter values for all the layers used in ToonNet.
 
     Args:
@@ -76,7 +76,6 @@ class CNet:
         # for i, tile in enumerate(tf.unstack(context_)):
         #     tf.summary.image('true_tile/{}'.format(i), tile, max_outputs=1)
         # tf.summary.image('true_tile/center', center_tile_, max_outputs=1)
-
 
         tiles = tf.unstack(tiles, axis=1)
         tiles = tf.concat(tiles, 0)

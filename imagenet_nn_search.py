@@ -4,7 +4,7 @@ import tensorflow as tf
 from Preprocessor import Preprocessor
 from train.AlexNet_NN_search_full import CNetTrainer
 from datasets.ImageNet import ImageNet
-from models.AlexNet_layers import AlexNet
+from models.AlexNet_layers_lrelu import AlexNet
 
 from constants import IMAGENET_VAL_DIR
 from scipy import misc
@@ -29,7 +29,7 @@ ckpt = '/Data/Logs/CNet/imagenet_SDNet_res1_default_baseline_finetune_conv_5/mod
 
 trainer = CNetTrainer(model=model, dataset=data, pre_processor=preprocessor, num_epochs=1, tag='inv_tv',
                       lr_policy='linear', optimizer='adam', init_lr=0.0003, end_lr=0.00003)
-trainer.compute_stats(ckpt, 4, model.name)
+# trainer.compute_stats(ckpt, 4, model.name)
 
 
 # imgs: 0, 3, 15, 26, 87, 95, 98, 146, 221, 229, 237, 259, 348, 378, 388, 422
@@ -39,7 +39,7 @@ trainer.compute_stats(ckpt, 4, model.name)
 #     misc.imshow(img)
 
 
-for i in [0, 3, 15, 26, 87, 95, 98, 146, 221, 229, 237, 259, 348, 378, 388, 422]:
+for i in [26]:
     trainer = CNetTrainer(model=model, dataset=data, pre_processor=preprocessor, num_epochs=1, tag='inv_tv',
                          lr_policy='linear', optimizer='adam', init_lr=0.0003, end_lr=0.00003)
     trainer.search_nn(load_val_image(i), ckpt, 4, model.name, i)
