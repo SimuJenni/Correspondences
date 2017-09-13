@@ -5,11 +5,11 @@ from models.AlexNet_self_sim import AlexNet
 from constants import LOG_DIR
 import os
 
-target_shape = [227, 227, 3]
+target_shape = [256, 256, 3]
 model = AlexNet(batch_size=64)
 data = ImageNet()
 preprocessor = Preprocessor(target_shape=target_shape, augment_color=False)
-trainer = CNetTrainer(model=model, dataset=data, pre_processor=preprocessor, num_epochs=90, tag='alex_sorted',
+trainer = CNetTrainer(model=model, dataset=data, pre_processor=preprocessor, num_epochs=90, tag='alex_selfsim',
                       lr_policy='linear', optimizer='adam', init_lr=0.001, end_lr=0.00001)
 chpt_path = os.path.join(LOG_DIR, 'imagenet_SDNet_res1_default_baseline_finetune_conv_5/model.ckpt-324174')
 

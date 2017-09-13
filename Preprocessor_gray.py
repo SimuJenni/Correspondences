@@ -1,33 +1,18 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import tensorflow as tf
 
 slim = tf.contrib.slim
 
 
 class Preprocessor:
-    def __init__(self, target_shape, crop_size, augment_color=False, aspect_ratio_range=(0.8, 1.2), area_range=(0.4, 0.9)):
-        self.tile_shape = target_shape
-        self.crop_size = crop_size
+    def __init__(self, target_shape, augment_color=False, aspect_ratio_range=(0.8, 1.2), area_range=(0.333, 1.0)):
+        self.target_shape = target_shape
         self.augment_color = augment_color
         self.aspect_ratio_range = aspect_ratio_range
         self.area_range = area_range
-
-    def crop_3x3_tile_block(self, image):
-        print('tile_shape: {}'.format(self.tile_shape))
-        crop_size = [self.crop_size[0], self.crop_size[1], 3]
-        print('crop_size: {}'.format(crop_size))
-        return tf.random_crop(image, size=crop_size)
-
-    def extract_tiles(self, image):
-        tiles = []
-        dx = self.crop_size[0]/3
-        dy = self.crop_size[1]/3
-        for x in range(3):
-            for y in range(3):
-                tile = tf.slice(image, [dx*x, dy*y, 0], [dx, dy, 3])
-                tile = self.extract_random_patch(tile)
-                tile = self.color_augment_and_scale(tile)
-                tiles.append(tile)
-        return tiles
 
     def central_crop(self, image):
         # Crop the central region of the image with an area containing 85% of the original image.
@@ -35,27 +20,20 @@ class Preprocessor:
 
         # Resize the image to the original height and width.
         image = tf.expand_dims(image, 0)
-        image = tf.image.resize_bilinear(image, [self.tile_shape[0], self.tile_shape[1]], align_corners=False)
+        image = tf.image.resize_bilinear(image, [self.target_shape[0], self.target_shape[1]], align_corners=False)
         image = tf.squeeze(image, [0])
 
         # Resize to output size
-        image.set_shape([self.tile_shape[0], self.tile_shape[1], 3])
+        image.set_shape([self.target_shape[0], self.target_shape[1], 3])
         return image
 
-    def extract_random_patch(self, image, bbox=(0., 0., 1., 1.)):
-        image = tf.cond(
-            tf.random_uniform(shape=(), minval=0.0, maxval=1.0) > 0.25,
-            true_fn=lambda: tf.contrib.image.rotate(image, tf.random_uniform((1,), minval=-0.2, maxval=0.2),
-                                                    interpolation='BILINEAR'),
-            false_fn=lambda: image)
-
+    def extract_random_patch(self, image):
         sample_distorted_bounding_box = tf.image.sample_distorted_bounding_box(
             tf.shape(image),
-            [[bbox]],
+            [[[0, 0, 1, 1]]],
             aspect_ratio_range=self.aspect_ratio_range,
             area_range=self.area_range,
-            use_image_if_no_bounding_boxes=True,
-            min_object_covered=0.01)
+            use_image_if_no_bounding_boxes=True)
         bbox_begin, bbox_size, distort_bbox = sample_distorted_bounding_box
 
         # Crop the image to the specified bounding box.
@@ -63,40 +41,39 @@ class Preprocessor:
         image = tf.expand_dims(image, 0)
         resized_image = tf.cond(
             tf.random_uniform(shape=(), minval=0.0, maxval=1.0) > 0.5,
-            true_fn=lambda: tf.image.resize_bilinear(image, self.tile_shape[:2], align_corners=False),
-            false_fn=lambda: tf.image.resize_bicubic(image, self.tile_shape[:2], align_corners=False))
+            fn1=lambda: tf.image.resize_bilinear(image, self.target_shape[:2], align_corners=False),
+            fn2=lambda: tf.image.resize_bicubic(image, self.target_shape[:2], align_corners=False))
         image = tf.squeeze(resized_image)
-        image.set_shape(self.tile_shape)
+        image.set_shape(self.target_shape)
         return image
 
     def color_augment_and_scale(self, image):
         image = tf.to_float(image) / 255.
-
-        if self.augment_color:
-            bright_delta, sat, hue_delta, cont = sample_color_params()
-            image = dist_color(image, bright_delta, sat, hue_delta, cont)
-            image = tf.clip_by_value(image, 0.0, 1.0)
+        image = tf.image.rgb_to_grayscale(image)
 
         # Scale to [-1, 1]
         image = tf.to_float(image) * 2. - 1.
         return image
 
     def process_train(self, image):
-        tile_block = self.crop_3x3_tile_block(image)
-        tile_block = tf.image.random_flip_left_right(tile_block)
-        print('img block: {}'.format(tile_block.get_shape().as_list()))
-        tf.summary.image('imgs/block', tf.expand_dims(tile_block, 0), max_outputs=1)
-        tiles = self.extract_tiles(tile_block)
-        print('tile {}'.format(tiles[0].get_shape().as_list()))
-        for i, tile in enumerate(tiles):
-            tf.summary.image('imgs/tile_{}'.format(i), tf.expand_dims(tile, 0), max_outputs=1)
-
-        tiles = tf.stack(tiles)
-        print('tiles: {}'.format(tiles.get_shape().as_list()))
-        return tiles
+        image = self.extract_random_patch(image)
+        image = self.color_augment_and_scale(image)
+        image = tf.image.random_flip_left_right(image)
+        return image
 
     def process_test(self, image):
         image = self.central_crop(image)
+        image = self.color_augment_and_scale(image)
+        # image = tf.image.random_flip_left_right(image)
+        return image
+
+
+class VOCPreprocessor(Preprocessor):
+    def __init__(self, target_shape, augment_color=True, aspect_ratio_range=(0.9, 1.1), area_range=(0.1, 1.0)):
+        Preprocessor.__init__(self, target_shape, augment_color, aspect_ratio_range, area_range)
+
+    def process_test(self, image):
+        image = self.extract_random_patch(image)
         image = self.color_augment_and_scale(image)
         image = tf.image.random_flip_left_right(image)
         return image
@@ -125,3 +102,7 @@ def dist_color(image, bright_delta, sat, hue_delta, cont):
     aug_image = tf.cond(tf.random_uniform(shape=(), minval=0.0, maxval=1.0) > 0.5,
                         fn1=lambda: image1, fn2=lambda: image2)
     return aug_image
+
+
+def flip_lr(image, p):
+    return tf.cond(p > 0.5, fn1=lambda: image, fn2=lambda: tf.image.flip_left_right(image))

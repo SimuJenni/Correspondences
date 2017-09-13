@@ -6,7 +6,7 @@ from models.CNet_center_classifier import CNet
 import os
 
 
-target_shape = [72, 72, 1]
+target_shape = [72, 72, 3]
 model = CNet(batch_size=128, target_shape=target_shape)
 data = ImageNet()
 preprocessor = Preprocessor(target_shape=target_shape, crop_size=[255, 255], augment_color=False)

@@ -13,3 +13,4 @@ trainer = CNetTrainer(model=model, dataset=data, pre_processor=preprocessor, num
                       lr_policy='linear', optimizer='adam', init_lr=0.001, end_lr=0.00001)
 chpt_path = os.path.join(LOG_DIR, 'imagenet_SDNet_res1_default_baseline_finetune_conv_5/model.ckpt-324174')
 trainer.transfer_finetune(chpt_path, num_conv2train=5, num_conv2init=0)
+

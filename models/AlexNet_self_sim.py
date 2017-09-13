@@ -43,7 +43,7 @@ def alexnet_argscope(activation=tf.nn.relu, kernel_size=(3, 3), padding='SAME', 
 
 
 class AlexNet:
-    def __init__(self, batch_size, fc_activation=tf.nn.relu, fix_bn=False, pool5=True, pad='VALID'):
+    def __init__(self, batch_size, fc_activation=tf.nn.relu, fix_bn=False, pool5=True, pad='SAME'):
         self.fix_bn = fix_bn
         self.fc_activation = fc_activation
         self.use_pool5 = pool5
@@ -74,13 +74,13 @@ class AlexNet:
                 layers.append(net)
                 net = conv_group(net, 256, kernel_size=[5, 5], scope='conv_2')
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_2', padding=self.pad)
-                net = self_sim(net)
                 layers.append(net)
                 net = slim.conv2d(net, 384, kernel_size=[3, 3], scope='conv_3')
                 layers.append(net)
                 net = conv_group(net, 384, kernel_size=[3, 3], scope='conv_4')
                 layers.append(net)
                 net = conv_group(net, 256, kernel_size=[3, 3], scope='conv_5')
+                net = self_sim(net)
                 net = slim.max_pool2d(net, kernel_size=[3, 3], stride=2, scope='pool_5', padding=self.pad)
                 layers.append(net)
 
@@ -116,7 +116,8 @@ def gram_matrix(v):
 
 def self_sim(net):
     net_shape = net.get_shape().as_list()
-    net = tf.nn.l2_normalize(net, 3)
+    net = slim.batch_norm(net, center=False)
+    #net = tf.nn.l2_normalize(net, 3)
     channels = []
     for x in range(net_shape[1]):
         for y in range(net_shape[2]):
