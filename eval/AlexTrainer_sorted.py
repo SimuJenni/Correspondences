@@ -191,7 +191,8 @@ class CNetTrainer:
             return None
 
     def transfer_finetune(self, chpt_path, num_conv2train=None, num_conv2init=None, dataset_id=None):
-        print('Restoring from: {}'.format(chpt_path))
+        if chpt_path:
+            print('Restoring from: {}'.format(chpt_path))
         if not self.additional_info:
             self.additional_info = 'conv_{}'.format(num_conv2train)
         self.is_finetune = True

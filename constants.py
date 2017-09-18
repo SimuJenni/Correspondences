@@ -9,7 +9,7 @@ LOG_DIR = os.path.join(DATA_DIR, 'Logs/CNet/')
 # Directories for tf-records
 OBJECTNET3D_TF_DATADIR = os.path.join(DATA_DIR, 'TF_Records/ObjectNet3D-TFRecords/')
 IMAGENET_TF_DATADIR = os.path.join(DATA_DIR, 'TF_Records/imagenet-CNET-TFRecords/')
-
+VOC2007_TF_DATADIR = os.path.join(DATA_DIR, 'TF_Records/voc2007-TFRecords/')
 PASCAL3D_TF_DATADIR = os.path.join(DATA_DIR, 'TF_Records/PASCAL3D-TFRecords/')
 CELEBA_TF_DATADIR = os.path.join(DATA_DIR, 'TF_Records/CelebA-TFRecords/')
 

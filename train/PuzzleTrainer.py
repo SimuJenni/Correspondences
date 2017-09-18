@@ -29,7 +29,7 @@ class CNetTrainer:
         self.opt_type = optimizer
         self.lr_policy = lr_policy
         self.init_lr = init_lr
-        self.end_lr = end_lr if end_lr is not None else 0.01*init_lr
+        self.end_lr = end_lr if end_lr is not None else 0.01 * init_lr
         self.is_finetune = False
         self.num_train_steps = None
         self.reinit_fc = reinit_fc
@@ -48,8 +48,10 @@ class CNetTrainer:
         return os.path.join(LOG_DIR, '{}/'.format(fname))
 
     def optimizer(self):
-        opts = {'adam': tf.train.AdamOptimizer(learning_rate=self.learning_rate(), beta1=0.9, epsilon=1e-5),
-                'sgd': tf.train.MomentumOptimizer(learning_rate=self.learning_rate(), momentum=0.9)}
+        lr = self.learning_rate()
+        tf.summary.scalar('Learning-Rate', lr)
+        opts = {'adam': tf.train.AdamOptimizer(learning_rate=lr, beta1=0.9, epsilon=1e-5),
+                'sgd': tf.train.MomentumOptimizer(learning_rate=lr, momentum=0.9)}
         return opts[self.opt_type]
 
     def learning_rate(self):
@@ -65,8 +67,8 @@ class CNetTrainer:
             self.num_train_steps = (self.dataset.get_num_train() / self.model.batch_size) * self.num_epochs
             print('Number of training steps: {}'.format(self.num_train_steps))
             provider = slim.dataset_data_provider.DatasetDataProvider(train_set, num_readers=2,
-                                                                      common_queue_capacity=10*self.model.batch_size,
-                                                                      common_queue_min=5*self.model.batch_size)
+                                                                      common_queue_capacity=10 * self.model.batch_size,
+                                                                      common_queue_min=5 * self.model.batch_size)
             [img_train] = provider.get(['image'])
 
             # Pre-process data
@@ -74,9 +76,9 @@ class CNetTrainer:
 
             # Make batches
             tiles_train = tf.train.batch([tiles_train],
-                                        batch_size=self.model.batch_size,
-                                        num_threads=8,
-                                        capacity=5 * self.model.batch_size)
+                                         batch_size=self.model.batch_size,
+                                         num_threads=8,
+                                         capacity=5 * self.model.batch_size)
             print('tiles batch: {}'.format(tiles_train.get_shape().as_list()))
 
         batch_queue = slim.prefetch_queue.prefetch_queue([tiles_train], num_threads=4)
@@ -87,14 +89,15 @@ class CNetTrainer:
             # Get the training dataset
             if dataset_id:
                 train_set = self.dataset.get_split(dataset_id)
-                self.num_train_steps = (self.dataset.get_num_dataset(dataset_id)/self.model.batch_size)*self.num_epochs
+                self.num_train_steps = (self.dataset.get_num_dataset(
+                    dataset_id) / self.model.batch_size) * self.num_epochs
             else:
                 train_set = self.dataset.get_trainset_labelled()
-                self.num_train_steps = (self.dataset.get_num_train_labelled()/self.model.batch_size)*self.num_epochs
+                self.num_train_steps = (self.dataset.get_num_train_labelled() / self.model.batch_size) * self.num_epochs
             print('Number of training steps: {}'.format(self.num_train_steps))
             provider = slim.dataset_data_provider.DatasetDataProvider(train_set, num_readers=4,
-                                                                      common_queue_capacity=20*self.model.batch_size,
-                                                                      common_queue_min=10*self.model.batch_size)
+                                                                      common_queue_capacity=20 * self.model.batch_size,
+                                                                      common_queue_min=10 * self.model.batch_size)
 
             # Parse a serialized Example proto to extract the image and metadata.
             [img_train, label_train] = provider.get(['image', 'label'])
@@ -107,7 +110,7 @@ class CNetTrainer:
             imgs_train, labels_train = tf.train.batch([img_train, label_train],
                                                       batch_size=self.model.batch_size,
                                                       num_threads=8,
-                                                      capacity=5*self.model.batch_size)
+                                                      capacity=5 * self.model.batch_size)
             batch_queue = slim.prefetch_queue.prefetch_queue([imgs_train, labels_train])
             return batch_queue.dequeue()
 
@@ -159,7 +162,7 @@ class CNetTrainer:
         return tf.train.piecewise_constant(self.global_step, boundaries=boundaries, values=values)
 
     def learning_rate_linear(self):
-        return tf.train.polynomial_decay(self.init_lr, self.global_step, 0.9*self.num_train_steps,
+        return tf.train.polynomial_decay(self.init_lr, self.global_step, 0.9 * self.num_train_steps,
                                          end_learning_rate=self.end_lr)
 
     def get_variables_to_train(self, num_conv_train):
@@ -246,7 +249,7 @@ class CNetTrainer:
                 train_op2 = self.make_train_op(pos_loss, self.optimizer(), scope='position_classifier')
 
                 # Start training
-                slim.learning.train(train_op1+train_op2, self.get_save_dir(),
+                slim.learning.train(train_op1 + train_op2, self.get_save_dir(),
                                     init_fn=self.cont_init_fn(chpt_path),
                                     save_summaries_secs=300,
                                     save_interval_secs=3000,

@@ -70,7 +70,7 @@ class SDNetTester:
             labels_test = tf.tile(tf.expand_dims(label_test, axis=0), [10, 1])
             imgs_test_t = tf.tile(tf.expand_dims(img_test, axis=0), [10, 1, 1, 1])
             imgs_test_p = tf.unstack(imgs_test_t, axis=0, num=10)
-            imgs_test_p = [self.pre_processor.process_transfer_test(im) for im in imgs_test_p]
+            imgs_test_p = [self.pre_processor.process_train(im) for im in imgs_test_p]
             imgs_test = tf.stack(imgs_test_p, axis=0)
 
         return imgs_test, labels_test
@@ -118,7 +118,7 @@ class SDNetTester:
                 imgs_test, labels_test = self.get_random_test_crops()
 
                 # Get predictions
-                preds_test = self.model.classifier(imgs_test, self.dataset.num_classes, training=False)
+                preds_test, _ = self.model.classifier(imgs_test, self.dataset.num_classes, training=False)
                 preds_test = tf.nn.sigmoid(preds_test)
                 preds_test = tf.reduce_mean(preds_test, axis=0, keep_dims=True)
 
